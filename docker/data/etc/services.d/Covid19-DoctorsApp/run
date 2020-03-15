@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv sh
+cd /var/opt/Covid19-DoctorsApp || exit
+# shellcheck disable=SC2010
+APP=$( ls target | grep -E "^Covid19-DoctorAppServer-.*\.jar$" )
+exec with-contenv s6-setuidgid www-data java -Xms40m -Xmx512m -jar ./target/"${APP}"
