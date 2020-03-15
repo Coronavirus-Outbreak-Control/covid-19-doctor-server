@@ -10,7 +10,7 @@ RUN mvn clean install
 
 # ============== BUILD IMAGE
 FROM doctor-app-server-base AS doctor-app-server
-COPY docker/DoctorsAppServer/data /
+COPY docker/data /
 
 WORKDIR /var/opt/Covid19-DoctorsApp
 

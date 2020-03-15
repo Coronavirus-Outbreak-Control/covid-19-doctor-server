@@ -15,7 +15,7 @@ public class BootstrapLogger {
             logger.info( line );
         }
 
-        logger.info( formatStartingLog( StringUtils.center( "Adding a servlet with /api/@ path.", pad, " " ) ) );
+        logger.info( formatStartingLog( StringUtils.center( "Adding a servlet with /@ path.", pad, " " ) ) );
         logger.info( formatStartingLog( StringUtils.center( "Started CronScheduler Monitor", pad, " " ) ) );
         logger.info( formatStartingLog( StringUtils.center( "Server is listening on port " + port, pad, " " ) ) );
         logger.info( formatStartingLog( "@" ) );
