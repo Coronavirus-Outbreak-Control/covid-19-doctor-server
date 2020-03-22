@@ -5,7 +5,6 @@ import io.fusionauth.jwt.domain.JWT;
 import io.fusionauth.jwt.hmac.HMACSigner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.coronaviruscheck.api.doctors.Main;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
 
