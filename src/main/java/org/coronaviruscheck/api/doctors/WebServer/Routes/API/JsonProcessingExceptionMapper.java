@@ -13,7 +13,7 @@ import javax.ws.rs.ext.Provider;
  */
 @Provider
 @Priority(1)
-public class JsonProcessingExceptionMapper implements ExceptionMapper<JsonProcessingException>{
+public class JsonProcessingExceptionMapper implements ExceptionMapper<JsonProcessingException> {
     @Override
     public Response toResponse( JsonProcessingException e ) {
         GenericResponse clientResponse = new GenericResponse();

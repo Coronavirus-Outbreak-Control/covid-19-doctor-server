@@ -11,6 +11,10 @@ public class ApplicationRegistry {
 
     private static Properties properties;
 
+    // Find your Account Sid and Auth Token at twilio.com/console
+    public static final String ACCOUNT_SID = "AC31711001880b7ddef17744951302ecaa";
+    public static final String AUTH_TOKEN  = "13b20bb2907cb0782e0e2bce0c26fec7";
+
     static {
 
         try {
@@ -29,5 +33,9 @@ public class ApplicationRegistry {
     public final static String ApplicationName = properties.getProperty( "ApplicationName" );
     public final static String NettyPort       = properties.getProperty( "Server.Netty.Port" );
     public final static String NettyBind       = properties.getProperty( "Server.Netty.Bind" );
+    public final static String JWT_SECRET      = properties.getProperty( "JWT_SECRET" );
+    public final static String MySqlDSN        = properties.getProperty( "MySql.DSN" );
+    public final static String MySqlUsername   = properties.getProperty( "MySql.Username" );
+    public final static String MySqlPassword   = properties.getProperty( "MySql.Password" );
 
 }
