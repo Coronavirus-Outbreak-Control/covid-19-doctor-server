@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 public class RequestToken {
 
     @POST
-    @Path("/activation/invite")
+    @Path("/activation/authenticate")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response run(){

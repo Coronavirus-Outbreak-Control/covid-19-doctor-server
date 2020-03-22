@@ -15,7 +15,7 @@ public class Doctors {
     private Doctors() {
     }
 
-    public static void createNew( String phone_number, Integer referred_by ) throws SQLException {
+    public static void createNew( String phone_number, Integer referred_by, Integer invitation_token ) throws SQLException {
 
         Connection        connection   = null;
         PreparedStatement preparedStmt = null;
@@ -24,14 +24,15 @@ public class Doctors {
 
             connection = DatabasePool.getDataSource().getConnection();
             preparedStmt = connection.prepareStatement(
-                    "INSERT INTO doctors ( phone_number, active, referred_by ) "
-                            + " VALUES( ?,?,? )"
+                    "INSERT INTO doctors ( phone_number, active, referred_by, invitation_token ) "
+                            + " VALUES( ?,?,?,? )"
             );
 
             // create the mysql insert preparedstatement
             preparedStmt.setString( 1, phone_number );
             preparedStmt.setBoolean( 2, false );
             preparedStmt.setInt( 3, referred_by );
+            preparedStmt.setInt( 4, invitation_token );
 
             preparedStmt.execute();
 
