@@ -1,23 +1,27 @@
 package org.coronaviruscheck.api.doctors;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.coronaviruscheck.api.doctors.CommonLibs.Crypt.Crypto;
-import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
+import org.apache.commons.lang3.StringUtils;
+import org.coronaviruscheck.api.doctors.DAO.Doctors;
 
-import java.security.SecureRandom;
-import java.util.Base64;
+import java.sql.SQLException;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 23/03/2020
  */
 public class Test {
-    public static void main( String[] args ) {
-        for ( int i = 0; i < 10; i++ ) {
+    public static void main( String[] args ) throws SQLException {
 
-            Crypto x = new Crypto();
-            String sha256hex = x.sha256( "+393920381849", ApplicationRegistry.JWT_SECRET );
-            System.out.println( sha256hex );
+//        String id = Doctors.createNew( "hash", 1 );
+        String id = "56358571";
+        if ( id == null ) {
+            System.out.println( "diocane" );
+        } else {
 
+            if ( id.length() > 4 ) {
+                id = id.substring( id.length() - 4 );
+            }
+
+            System.out.println( StringUtils.leftPad( id, 4, "0" ) );
         }
     }
 

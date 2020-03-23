@@ -24,7 +24,7 @@ import java.util.HashMap;
  * @author Domenico Lupinetti <ostico@gmail.com> - 22/03/2020
  */
 @Path("/v1")
-public class RequestToken {
+public class RefreshToken {
 
     public Logger logger = LogManager.getLogger( this.getClass() );
 

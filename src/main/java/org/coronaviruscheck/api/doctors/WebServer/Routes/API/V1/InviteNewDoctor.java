@@ -4,20 +4,25 @@ import io.fusionauth.jwt.JWTExpiredException;
 import io.fusionauth.jwt.Verifier;
 import io.fusionauth.jwt.domain.JWT;
 import io.fusionauth.jwt.hmac.HMACVerifier;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.Crypt.Crypto;
+import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
 import org.coronaviruscheck.api.doctors.WebServer.Twilio.SMS;
 import org.coronaviruscheck.api.doctors.WebServer.Twilio.TwilioException;
+import org.redisson.api.RAtomicLong;
+import org.redisson.api.RBucket;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 22/03/2020
@@ -57,7 +62,27 @@ public class InviteNewDoctor {
 
             Crypto crypto = new Crypto();
             String token  = crypto.sha256( payload.get( "phone_number" ), ApplicationRegistry.JWT_SECRET );
-            Doctors.createNew( token, Objects.requireNonNull( jwt.getInteger( "id" ) ), crypto.getRandom5Digits() );
+            String id     = Doctors.createNew( token, Objects.requireNonNull( jwt.getInteger( "id" ) ) );
+
+            RAtomicLong atomicLong = RedisHandler.client.getAtomicLong( "doc_sequence" );
+            String      seq        = String.valueOf( atomicLong.incrementAndGet() );
+            atomicLong.expire( 1, TimeUnit.SECONDS );
+
+            if ( id.length() > 4 ) {
+                id = id.substring( id.length() - 4 );
+            }
+
+            id = StringUtils.leftPad( id, 4, "0" );
+            seq = StringUtils.leftPad( seq, 2, "0" );
+
+            String authKey = id + seq;
+
+            RBucket<String> authKeyBucket    = RedisHandler.client.getBucket( token );
+            RBucket<String> reverseKeyBucket = RedisHandler.client.getBucket( authKey );
+            authKeyBucket.set( authKey );
+            reverseKeyBucket.set( token );
+            authKeyBucket.expire( 60 * 60, TimeUnit.SECONDS );
+            reverseKeyBucket.expire( 60 * 60, TimeUnit.SECONDS );
 
         } catch ( TwilioException e ) {
 

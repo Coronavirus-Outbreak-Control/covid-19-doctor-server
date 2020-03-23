@@ -34,6 +34,7 @@ public class ApplicationRegistry {
     public final static String NettyPort       = properties.getProperty( "Server.Netty.Port" );
     public final static String NettyBind       = properties.getProperty( "Server.Netty.Bind" );
     public final static String JWT_SECRET      = properties.getProperty( "JWT_SECRET" );
+    public final static String RedisDSN        = properties.getProperty( "Redis.DSN" );
     public final static String MySqlDSN        = properties.getProperty( "MySql.DSN" );
     public final static String MySqlUsername   = properties.getProperty( "MySql.Username" );
     public final static String MySqlPassword   = properties.getProperty( "MySql.Password" );

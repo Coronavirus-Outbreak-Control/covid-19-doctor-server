@@ -3,12 +3,14 @@ package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.Crypt.Crypto;
+import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
 import org.coronaviruscheck.api.doctors.WebServer.Twilio.SMS;
 import org.coronaviruscheck.api.doctors.WebServer.Twilio.TwilioException;
+import org.redisson.api.RBucket;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -37,10 +39,15 @@ public class ActivationRequest {
         try {
             String token = crypto.sha256( payload.get( "phone_number" ), ApplicationRegistry.JWT_SECRET );
 
-            Doctor doc = Doctors.getInactiveDoctor( token );
+            RBucket<String> authKeyBucket = RedisHandler.client.getBucket( token );
 
-            SMS    sms   = new SMS();
-            sms.sendMessage( payload.get( "phone_number" ), doc.getInvitation_token() );
+            String authKey = authKeyBucket.get();
+            if ( authKey == null ) {
+                throw new EmptyStackException();
+            }
+
+            SMS sms = new SMS();
+            sms.sendMessage( payload.get( "phone_number" ), authKey );
 
         } catch ( TwilioException e ) {
 

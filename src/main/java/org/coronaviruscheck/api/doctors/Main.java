@@ -5,6 +5,7 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.BootstrapLogger;
+import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.ResourceConfig;
 import org.glassfish.jersey.netty.httpserver.NettyHttpContainerProvider;
@@ -71,6 +72,7 @@ public class Main {
     private Main( ResourceConfig serviceConfig, String[] args ) {
         this.commandLine = this.parseArgs( args );
         this.registerShutdownHook();
+        RedisHandler.init();
         this.setServiceConfig( serviceConfig );
         this.setMemoryCheck();
     }

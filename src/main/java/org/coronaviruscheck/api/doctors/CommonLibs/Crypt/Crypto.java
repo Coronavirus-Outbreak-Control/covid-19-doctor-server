@@ -85,6 +85,8 @@ public class Crypto {
     }
 
     public String getRandom5Digits() {
+        //5284 . 47
+
         double randomDouble = Math.random();
         randomDouble = randomDouble * 100000 + 1;
         return String.format( "%05d", (int) randomDouble );
@@ -96,5 +98,6 @@ public class Crypto {
         }
         return text;
     }
+
 
 }
