@@ -1,4 +1,7 @@
-package org.coronaviruscheck.api.doctors.CommonLibs;
+package org.coronaviruscheck.api.doctors.CommonLibs.Crypt;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -47,40 +50,51 @@ public class Crypto {
 
     }
 
-    public String decrypt( String encryptedText, String password ) throws Exception {
+    public String decrypt( String encryptedText, String password ) throws CryptoException {
 
-        Cipher cipher = Cipher.getInstance( "AES/CBC/PKCS5PADDING" );
+        try {
+            Cipher cipher = Cipher.getInstance( "AES/CBC/PKCS5PADDING" );
 
-        //strip off the salt and iv
-        ByteBuffer buffer    = ByteBuffer.wrap( Base64.getDecoder().decode( encryptedText ) );
+            //strip off the salt and iv
+            ByteBuffer buffer = ByteBuffer.wrap( Base64.getDecoder().decode( encryptedText ) );
 
-        byte[]     saltBytes = new byte[ 20 ];
-        buffer.get( saltBytes, 0, saltBytes.length );
+            byte[] saltBytes = new byte[ 20 ];
+            buffer.get( saltBytes, 0, saltBytes.length );
 
-        byte[] ivBytes1 = new byte[ cipher.getBlockSize() ];
-        buffer.get( ivBytes1, 0, ivBytes1.length );
+            byte[] ivBytes1 = new byte[ cipher.getBlockSize() ];
+            buffer.get( ivBytes1, 0, ivBytes1.length );
 
-        byte[] encryptedTextBytes = new byte[ buffer.capacity() - saltBytes.length - ivBytes1.length ];
+            byte[] encryptedTextBytes = new byte[ buffer.capacity() - saltBytes.length - ivBytes1.length ];
 
-        buffer.get( encryptedTextBytes );
+            buffer.get( encryptedTextBytes );
 
-        byte[]          iv     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        IvParameterSpec ivspec = new IvParameterSpec( iv );
+            byte[]          iv     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            IvParameterSpec ivspec = new IvParameterSpec( iv );
 
-        SecretKeyFactory factory   = SecretKeyFactory.getInstance( "PBKDF2WithHmacSHA256" );
-        KeySpec          spec      = new PBEKeySpec( password.toCharArray(), saltBytes, 65536, 128 );
-        SecretKey        tmp       = factory.generateSecret( spec );
-        SecretKeySpec    secretKey = new SecretKeySpec( tmp.getEncoded(), "AES" );
+            SecretKeyFactory factory   = SecretKeyFactory.getInstance( "PBKDF2WithHmacSHA256" );
+            KeySpec          spec      = new PBEKeySpec( password.toCharArray(), saltBytes, 65536, 128 );
+            SecretKey        tmp       = factory.generateSecret( spec );
+            SecretKeySpec    secretKey = new SecretKeySpec( tmp.getEncoded(), "AES" );
 
-        cipher.init( Cipher.DECRYPT_MODE, secretKey, ivspec );
-        return new String( cipher.doFinal( encryptedTextBytes ) );
+            cipher.init( Cipher.DECRYPT_MODE, secretKey, ivspec );
+            return new String( cipher.doFinal( encryptedTextBytes ) );
+        } catch ( Exception e ) {
+            throw new CryptoException( e );
+        }
 
     }
 
-    public int getRandomInt() {
+    public String getRandom5Digits() {
         double randomDouble = Math.random();
         randomDouble = randomDouble * 100000 + 1;
-        return (int) randomDouble;
+        return String.format( "%05d", (int) randomDouble );
+    }
+
+    public String sha256( String text, String salt ) {
+        for ( int i = 0; i < 10; i++ ) {
+            text = DigestUtils.sha256Hex( salt + text );
+        }
+        return text;
     }
 
 }

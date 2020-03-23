@@ -1,24 +1,23 @@
 package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
 import io.fusionauth.jwt.JWTExpiredException;
 import io.fusionauth.jwt.Verifier;
 import io.fusionauth.jwt.domain.JWT;
 import io.fusionauth.jwt.hmac.HMACVerifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.coronaviruscheck.api.doctors.CommonLibs.Crypto;
+import org.coronaviruscheck.api.doctors.CommonLibs.Crypt.Crypto;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
+import org.coronaviruscheck.api.doctors.WebServer.Twilio.SMS;
 import org.coronaviruscheck.api.doctors.WebServer.Twilio.TwilioException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 22/03/2020
@@ -50,15 +49,15 @@ public class InviteNewDoctor {
             // Verify and decode the encoded string JWT to a rich object
             JWT jwt = JWT.getDecoder().decode( authString.substring( 7 ), verifier );
 
-            Long user_id = jwt.getLong( "id" );
+            SMS sms = new SMS();
+            sms.sendMessage(
+                    payload.get( "phone_number" ),
+                    "Please download the app from the store."
+            );
 
-            this.sendMessage( payload.get( "phone_number" ) );
             Crypto crypto = new Crypto();
-            String token  = crypto.encrypt( payload.get( "phone_number" ), ApplicationRegistry.JWT_SECRET );
-            Doctors.createNew( token, user_id.intValue(), crypto.getRandomInt() );
-
-//            String decrypt = crypto.decrypt( token, ApplicationRegistry.JWT_SECRET );
-//            assert( payload.get( "phone_number" ).equals( decrypt ) );
+            String token  = crypto.sha256( payload.get( "phone_number" ), ApplicationRegistry.JWT_SECRET );
+            Doctors.createNew( token, Objects.requireNonNull( jwt.getInteger( "id" ) ), crypto.getRandom5Digits() );
 
         } catch ( TwilioException e ) {
 
@@ -72,43 +71,22 @@ public class InviteNewDoctor {
                     Response.Status.SERVICE_UNAVAILABLE.getStatusCode()
             ).entity( genericResponse ).build();
 
-        } catch( JWTExpiredException je ){
+        } catch ( JWTExpiredException je ) {
 
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.message = "Token expired.";
             genericResponse.status = Response.Status.FORBIDDEN.getStatusCode();
             return Response.status( Response.Status.FORBIDDEN.getStatusCode() ).entity( genericResponse ).build();
 
-        } catch ( Exception e ) { //SQLException also
+        } catch ( NullPointerException e ) {
+            logger.error( e.getMessage(), e );
+            return Response.status( Response.Status.BAD_REQUEST.getStatusCode() ).build();
+        } catch ( Exception e ) { //SQLException and CryptoException also
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.SERVICE_UNAVAILABLE.getStatusCode() ).build();
         }
 
         return Response.ok().build();
-
-    }
-
-    protected void sendMessage( String phone_number ) throws TwilioException {
-
-        Twilio.init( ApplicationRegistry.ACCOUNT_SID, ApplicationRegistry.AUTH_TOKEN );
-
-        Message message = Message
-                .creator(
-                        new PhoneNumber( phone_number ), // to
-                        new PhoneNumber( "+442033896187" ), // from
-                        "Please download the app from the store."
-                )
-                .create();
-
-        logger.debug( message );
-
-        switch ( message.getStatus() ) {
-            case FAILED:
-            case UNDELIVERED:
-                throw new TwilioException( message.getErrorMessage(), message.getErrorCode() );
-            default:
-                break;
-        }
 
     }
 
