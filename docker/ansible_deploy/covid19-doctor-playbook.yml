@@ -1,0 +1,60 @@
+---
+- hosts: all
+  become: true
+  vars:
+    default_container_name: Covid19-Doctors
+    default_container_image: registry.gitlab.com/coronavirus-outbreak-control/covid-19-doctor-server
+  tasks:
+    - include_vars: gitlab-registry.login.yml
+
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+
+    - name: Login into gitlab registry
+      docker_login:
+        registry_url: registry.gitlab.com
+        username: "{{ email }}"
+        password: "{{ password }}"
+    - name: Pull Docker Image
+      docker_image:
+        name: "{{ default_container_image }}"
+        source: pull
+        force_source: yes
+        state: present
+
+    - name: Create container
+      docker_container:
+        name: "{{ default_container_name }}"
+        hostname: "{{ default_container_name }}"
+        image: "{{ default_container_image }}"
+        network_mode: host
+        networks_cli_compatible: yes
+#        volumes:
+#          - /var/log/nginx:/var/log/nginx
+        log_driver: json-file
+        log_opt: max-size=1g , max-file=10
+        state: started
+    - name: prune old images
+      docker_prune:
+        images: yes
