@@ -2,3 +2,7 @@
 target/*
 logs/*
 .DS_Store
+/docker/ansible_deploy/venv/
+/docker/ansible_deploy/gitlab-registry.login.yml
+/docker/.env.prod
+settings.xml

@@ -13,14 +13,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.locale>1.8</maven.compiler.locale>
         <DoctorAppServer>org.coronaviruscheck.api.doctors.Main</DoctorAppServer>
-        <jwt_secret>my_secret_key</jwt_secret>
-
-        <redis_dsn>redis://localhost:6379</redis_dsn>
-        <mysql_dsn>jdbc:mysql://localhost:3306/api_coronaviruscheck?useLegacyDatetimeCode=false&amp;serverTimezone=Europe/Rome&amp;characterEncoding=utf-8&amp;rewriteBatchedStatements=true</mysql_dsn>
-        <mysql_username>root</mysql_username>
-        <mysql_password>example</mysql_password>
-
-        <env>production</env>
     </properties>
 
     <dependencies>
@@ -128,14 +120,7 @@
         </dependency>
 
         <!-- MySQL -->
-        <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.19</version>
-        </dependency>
         <!-- Persistence -->
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

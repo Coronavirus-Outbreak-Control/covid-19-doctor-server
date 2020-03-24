@@ -11,10 +11,6 @@ public class ApplicationRegistry {
 
     private static Properties properties;
 
-    // Find your Account Sid and Auth Token at twilio.com/console
-    public static final String ACCOUNT_SID = "AC31711001880b7ddef17744951302ecaa";
-    public static final String AUTH_TOKEN  = "13b20bb2907cb0782e0e2bce0c26fec7";
-
     static {
 
         try {
@@ -38,5 +34,9 @@ public class ApplicationRegistry {
     public final static String MySqlDSN        = properties.getProperty( "MySql.DSN" );
     public final static String MySqlUsername   = properties.getProperty( "MySql.Username" );
     public final static String MySqlPassword   = properties.getProperty( "MySql.Password" );
+
+    // Find your Account Sid and Auth Token at twilio.com/console
+    public final static String ACCOUNT_SID = properties.getProperty( "Twilio.ACCOUNT_SID" );
+    public final static String AUTH_TOKEN  = properties.getProperty( "Twilio.AUTH_TOKEN" );
 
 }

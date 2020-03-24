@@ -81,8 +81,8 @@ public class InviteNewDoctor {
             RBucket<String> reverseKeyBucket = RedisHandler.client.getBucket( authKey );
             authKeyBucket.set( authKey );
             reverseKeyBucket.set( token );
-            authKeyBucket.expire( 60 * 60, TimeUnit.SECONDS );
-            reverseKeyBucket.expire( 60 * 60, TimeUnit.SECONDS );
+            authKeyBucket.expire( 24 * 60 * 60, TimeUnit.SECONDS );
+            reverseKeyBucket.expire( 24 * 60 * 60, TimeUnit.SECONDS );
 
         } catch ( TwilioException e ) {
 
