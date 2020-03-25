@@ -46,15 +46,9 @@ public class ActivationConfirm {
             Doctor  doc    = Doctors.getInactiveDoctorByPhone( phoneNumber );
             boolean result = Doctors.setActive( doc );
 
-            Signer signer = HMACSigner.newSHA256Signer( ApplicationRegistry.JWT_SECRET );
-
-            JWT jwt = new JWT().setExpiration( ZonedDateTime.now( ZoneOffset.UTC ).plusHours( 24 ) );
-            jwt.addClaim( "id", doc.getId() );
-            String jwToken = JWT.getEncoder().encode( jwt, signer );
-
             ActivationConfirmResponse clientResponse = new ActivationConfirmResponse();
             clientResponse.id = doc.getId();
-            clientResponse.token = jwToken;
+            clientResponse.token = doc.getPhone_number();
 
             String       today = Instant.now().atZone( ZoneId.of( "UTC" ) ).format( DateTimeFormatter.ofPattern( "yyyy-MM-dd" ) );
             RSet<String> set   = RedisHandler.client.getSet( "act_code-" + today );
