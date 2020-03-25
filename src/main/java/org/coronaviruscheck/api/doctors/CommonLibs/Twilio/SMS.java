@@ -1,4 +1,4 @@
-package org.coronaviruscheck.api.doctors.WebServer.Twilio;
+package org.coronaviruscheck.api.doctors.CommonLibs.Twilio;
 
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;

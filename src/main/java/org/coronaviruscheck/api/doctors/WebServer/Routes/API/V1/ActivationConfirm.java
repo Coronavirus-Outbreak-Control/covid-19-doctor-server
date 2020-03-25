@@ -10,17 +10,19 @@ import org.coronaviruscheck.api.doctors.DAO.Doctors;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.ActivationConfirmResponse;
-import org.coronaviruscheck.api.doctors.WebServer.Responses.RequestTokenResponse;
 import org.redisson.api.RBucket;
+import org.redisson.api.RSet;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.EmptyStackException;
-import java.util.HashMap;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 23/03/2020
@@ -41,18 +43,22 @@ public class ActivationConfirm {
 
         try {
 
-            Doctor  doc    = Doctors.getInactiveDoctor( phoneNumber );
-            boolean result = Doctors.setActive( phoneNumber );
+            Doctor  doc    = Doctors.getInactiveDoctorByPhone( phoneNumber );
+            boolean result = Doctors.setActive( doc );
 
             Signer signer = HMACSigner.newSHA256Signer( ApplicationRegistry.JWT_SECRET );
 
-            JWT jwt = new JWT().setExpiration( ZonedDateTime.now( ZoneOffset.UTC ).plusMinutes( 10 ) );
+            JWT jwt = new JWT().setExpiration( ZonedDateTime.now( ZoneOffset.UTC ).plusHours( 24 ) );
             jwt.addClaim( "id", doc.getId() );
             String jwToken = JWT.getEncoder().encode( jwt, signer );
 
             ActivationConfirmResponse clientResponse = new ActivationConfirmResponse();
             clientResponse.id = doc.getId();
             clientResponse.token = jwToken;
+
+            String       today = Instant.now().atZone( ZoneId.of( "UTC" ) ).format( DateTimeFormatter.ofPattern( "yyyy-MM-dd" ) );
+            RSet<String> set   = RedisHandler.client.getSet( "act_code-" + today );
+            set.remove( authKeyBySms );
 
             return Response.ok( clientResponse ).build();
 

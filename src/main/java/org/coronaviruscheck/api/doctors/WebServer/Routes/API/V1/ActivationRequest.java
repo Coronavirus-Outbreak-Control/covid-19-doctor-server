@@ -4,12 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.Crypt.Crypto;
 import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
-import org.coronaviruscheck.api.doctors.DAO.Doctors;
-import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
+import org.coronaviruscheck.api.doctors.CommonLibs.Twilio.SMS;
+import org.coronaviruscheck.api.doctors.CommonLibs.Twilio.TwilioException;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
-import org.coronaviruscheck.api.doctors.WebServer.Twilio.SMS;
-import org.coronaviruscheck.api.doctors.WebServer.Twilio.TwilioException;
 import org.redisson.api.RBucket;
 
 import javax.ws.rs.Consumes;
@@ -35,9 +33,10 @@ public class ActivationRequest {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response run( HashMap<String, String> payload ) {
 
-        Crypto crypto = new Crypto();
         try {
-            String token = crypto.sha256( payload.get( "phone_number" ), ApplicationRegistry.JWT_SECRET );
+            String token = Crypto.sha256( payload.get( "phone_number" ), ApplicationRegistry.JWT_SECRET );
+
+            logger.debug( "Generated Token phone: " + token );
 
             RBucket<String> authKeyBucket = RedisHandler.client.getBucket( token );
 

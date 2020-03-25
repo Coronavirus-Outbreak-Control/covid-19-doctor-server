@@ -44,7 +44,7 @@ public class RefreshToken {
 
         try {
 
-            Doctor doc = Doctors.getActiveDoctor( authString.substring( 7 ) );
+            Doctor doc = Doctors.getActiveDoctorByPhone( authString.substring( 7 ) );
 
             Signer signer = HMACSigner.newSHA256Signer( ApplicationRegistry.JWT_SECRET );
 

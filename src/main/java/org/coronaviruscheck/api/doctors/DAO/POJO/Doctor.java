@@ -15,7 +15,6 @@ public class Doctor {
     private int       referred_by;
     private Timestamp created_at;
     private Timestamp confirmed_at;
-    private String    invitation_token;
 
     public int getId() {
         return id;
@@ -81,11 +80,4 @@ public class Doctor {
         this.confirmed_at = confirmed_at;
     }
 
-    public String getInvitation_token() {
-        return invitation_token;
-    }
-
-    public void setInvitation_token( String invitation_token ) {
-        this.invitation_token = invitation_token;
-    }
 }

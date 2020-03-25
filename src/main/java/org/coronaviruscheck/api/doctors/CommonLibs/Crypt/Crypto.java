@@ -1,7 +1,6 @@
 package org.coronaviruscheck.api.doctors.CommonLibs.Crypt;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -20,7 +19,7 @@ import java.util.Base64;
  */
 public class Crypto {
 
-    public String encrypt( String toBeEncrypted, String password ) throws Exception {
+    public static String encrypt( String toBeEncrypted, String password ) throws Exception {
 
         byte[]          iv      = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         IvParameterSpec ivBytes = new IvParameterSpec( iv );
@@ -50,7 +49,7 @@ public class Crypto {
 
     }
 
-    public String decrypt( String encryptedText, String password ) throws CryptoException {
+    public static String decrypt( String encryptedText, String password ) throws CryptoException {
 
         try {
             Cipher cipher = Cipher.getInstance( "AES/CBC/PKCS5PADDING" );
@@ -84,15 +83,13 @@ public class Crypto {
 
     }
 
-    public String getRandom5Digits() {
-        //5284 . 47
-
+    public static String getRandomLeftPaddedDigits( int digits ) {
         double randomDouble = Math.random();
-        randomDouble = randomDouble * 100000 + 1;
-        return String.format( "%05d", (int) randomDouble );
+        randomDouble = randomDouble * (int) Math.pow(10, digits) + 1;
+        return String.format( "%0" + digits + "d", (int) randomDouble );
     }
 
-    public String sha256( String text, String salt ) {
+    public static String sha256( String text, String salt ) {
         for ( int i = 0; i < 10; i++ ) {
             text = DigestUtils.sha256Hex( salt + text );
         }

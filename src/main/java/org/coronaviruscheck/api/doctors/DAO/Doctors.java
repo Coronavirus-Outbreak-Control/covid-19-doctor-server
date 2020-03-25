@@ -40,7 +40,7 @@ public class Doctors {
             try {
                 preparedStmt.execute();
             } catch ( SQLIntegrityConstraintViolationException e ) {
-                Doctor doc = getInactiveDoctor( phone_number );
+                Doctor doc = getInactiveDoctorByPhone( phone_number );
                 return String.valueOf( doc.getId() );
             }
 
@@ -83,11 +83,15 @@ public class Doctors {
 
     }
 
-    public static Doctor getActiveDoctor( String cryptPhoneNumber ) throws SQLException {
+    public static boolean setActive( Doctor doc ) throws SQLException {
+        return setActive( doc.getPhone_number() );
+    }
+
+    public static Doctor getActiveDoctorByPhone( String cryptPhoneNumber ) throws SQLException {
         return getDoctor( cryptPhoneNumber, true );
     }
 
-    public static Doctor getInactiveDoctor( String cryptPhoneNumber ) throws SQLException {
+    public static Doctor getInactiveDoctorByPhone( String cryptPhoneNumber ) throws SQLException {
         return getDoctor( cryptPhoneNumber, false );
     }
 

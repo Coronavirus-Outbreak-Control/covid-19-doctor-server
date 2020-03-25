@@ -1,4 +1,4 @@
-package org.coronaviruscheck.api.doctors.WebServer.Twilio;
+package org.coronaviruscheck.api.doctors.CommonLibs.Twilio;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 22/03/2020

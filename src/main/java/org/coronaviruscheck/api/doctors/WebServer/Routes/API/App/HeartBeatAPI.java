@@ -22,8 +22,6 @@ public class HeartBeatAPI {
     public Response ping() {
 
         logger = LogManager.getLogger( this.getClass() );
-        logger.info( "Ping..." );
-
         try {
 
             logger.info( "Pong..." );
