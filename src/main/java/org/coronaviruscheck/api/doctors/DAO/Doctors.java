@@ -68,7 +68,7 @@ public class Doctors {
 
             connection = DatabasePool.getDataSource().getConnection();
             preparedStmt = connection.prepareStatement(
-                    "UPDATE doctors SET active = ? WHERE phone_number = ? and active = 0"
+                    "UPDATE doctors SET active = ?, confirmed_at = NOW() WHERE phone_number = ? and active = 0"
             );
 
             preparedStmt.setInt( 1, 1 );
