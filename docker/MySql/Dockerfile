@@ -1,3 +1,3 @@
 FROM mysql As covid-mysql
 
-COPY data /
+COPY docker/MySql/data /
