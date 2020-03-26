@@ -21,8 +21,6 @@ services:
       args:
         _env: ${_env}
     container_name: covid-19-doctor1
-    volumes:
-      - /Users/hashashiyyin/IdeaProjects/Covid19-DoctorServer/logs:/Covid19-DoctorsApp/logs
     ports:
       - 9000:9000
     networks:
