@@ -18,19 +18,18 @@ public class Doctors {
     private Doctors() {
     }
 
-    public static String createNew( String phone_number, Integer referred_by ) throws SQLException {
+    public static void createNew(
+            Connection connection,
+            String phone_number,
+            Integer referred_by
+    ) throws SQLException {
 
-        Connection        connection   = null;
-        PreparedStatement preparedStmt = null;
+        PreparedStatement preparedStmt = connection.prepareStatement(
+                "INSERT INTO doctors ( phone_number, active, referred_by ) "
+                        + " VALUES( ?,?,? )"
+        );
 
         try {
-
-            connection = DatabasePool.getDataSource().getConnection();
-            preparedStmt = connection.prepareStatement(
-                    "INSERT INTO doctors ( phone_number, active, referred_by ) "
-                            + " VALUES( ?,?,? )",
-                    Statement.RETURN_GENERATED_KEYS
-            );
 
             // create the mysql insert preparedstatement
             preparedStmt.setString( 1, phone_number );
@@ -39,23 +38,11 @@ public class Doctors {
 
             try {
                 preparedStmt.execute();
-            } catch ( SQLIntegrityConstraintViolationException e ) {
-                Doctor doc = getInactiveDoctorByPhone( phone_number );
-                return String.valueOf( doc.getId() );
+            } catch ( SQLIntegrityConstraintViolationException ignore ) {
             }
-
-            ResultSet rs = preparedStmt.getGeneratedKeys();
-
-            String id = null;
-            if ( rs.next() ) {
-                id = String.valueOf( rs.getLong( 1 ) );
-            }
-
-            return id;
 
         } finally {
             DbUtils.closeQuietly( preparedStmt );
-            DbUtils.closeQuietly( connection );
         }
 
     }

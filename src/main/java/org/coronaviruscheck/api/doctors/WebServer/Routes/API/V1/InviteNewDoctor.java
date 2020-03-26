@@ -2,12 +2,14 @@ package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 
 import io.fusionauth.jwt.JWTExpiredException;
 import io.fusionauth.jwt.domain.JWT;
+import org.apache.commons.dbutils.DbUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.Crypt.Crypto;
 import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
 import org.coronaviruscheck.api.doctors.CommonLibs.Twilio.SMS;
 import org.coronaviruscheck.api.doctors.CommonLibs.Twilio.TwilioException;
+import org.coronaviruscheck.api.doctors.DAO.DatabasePool;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
@@ -19,6 +21,10 @@ import org.redisson.api.RSet;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -67,7 +73,7 @@ public class InviteNewDoctor {
         } catch ( NullPointerException e ) {
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.BAD_REQUEST.getStatusCode() ).build();
-        } catch ( Exception e ) { //SQLException
+        } catch ( Exception e ) { // | SQLException
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.SERVICE_UNAVAILABLE.getStatusCode() ).build();
         }
@@ -79,25 +85,44 @@ public class InviteNewDoctor {
     public void execute( String phone_number, int user_id ) throws Exception {
 
         String token = Crypto.sha256( phone_number, ApplicationRegistry.JWT_SECRET );
-        String id    = Doctors.createNew( token, user_id );
 
-        String       today = Instant.now().atZone( ZoneId.of( "UTC" ) ).format( DateTimeFormatter.ofPattern( "yyyy-MM-dd" ) );
-        RSet<String> set   = RedisHandler.client.getSet( "act_code-" + today );
+        Connection connection = null;
 
-        String authKey = this.findFreeRandom( set );
+        try {
 
-        RBucket<String> authKeyBucket    = RedisHandler.client.getBucket( token );
-        RBucket<String> reverseKeyBucket = RedisHandler.client.getBucket( authKey );
-        authKeyBucket.set( authKey );
-        reverseKeyBucket.set( token );
-        authKeyBucket.expire( 24 * 60 * 60, TimeUnit.SECONDS );
-        reverseKeyBucket.expire( 24 * 60 * 60, TimeUnit.SECONDS );
+            connection = DatabasePool.getDataSource().getConnection();
+            connection.setAutoCommit( false );
 
-        SMS sms = new SMS();
-        sms.sendMessage(
-                phone_number,
-                "You have been invited to join Coronavirus Outbreak Control. Please download the app from the store."
-        );
+            Doctors.createNew( connection, token, user_id );
+
+            String       today = Instant.now().atZone( ZoneId.of( "UTC" ) ).format( DateTimeFormatter.ofPattern( "yyyy-MM-dd" ) );
+            RSet<String> set   = RedisHandler.client.getSet( "act_code-" + today );
+
+            String authKey = this.findFreeRandom( set );
+
+            RBucket<String> authKeyBucket    = RedisHandler.client.getBucket( token );
+            RBucket<String> reverseKeyBucket = RedisHandler.client.getBucket( authKey );
+            authKeyBucket.set( authKey );
+            reverseKeyBucket.set( token );
+            authKeyBucket.expire( 24 * 60 * 60, TimeUnit.SECONDS );
+            reverseKeyBucket.expire( 24 * 60 * 60, TimeUnit.SECONDS );
+
+            SMS sms = new SMS();
+            sms.sendMessage(
+                    phone_number,
+                    "You have been invited to join Coronavirus Outbreak Control. Please download the app from the store."
+            );
+
+            connection.commit();
+
+        } catch ( Exception e ){
+            if ( connection != null ) {
+                connection.rollback();
+            }
+            throw e;
+        } finally {
+            DbUtils.closeQuietly( connection );
+        }
 
     }
 
