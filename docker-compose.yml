@@ -10,7 +10,8 @@ services:
   doctor-app-server-base:
     image: doctor-app-server-base
     build:
-      context: docker/doctor-app-server-base
+      context: .
+      dockerfile: docker/doctor-app-server-base/Dockerfile
 
   doctor-app-server:
     image: registry.gitlab.com/coronavirus-outbreak-control/covid-19-doctor-server
@@ -32,6 +33,9 @@ services:
 
   mysql:
     image: docker_mysql
+    build:
+      context: .
+      dockerfile: docker/MySql/Dockerfile
     command: --default-authentication-plugin=mysql_native_password
     ports:
       - 3306:3306
