@@ -32,7 +32,7 @@ services:
       - redis
 
   mysql:
-    image: docker_mysql
+    image: covid_mysql
     build:
       context: .
       dockerfile: docker/MySql/Dockerfile
