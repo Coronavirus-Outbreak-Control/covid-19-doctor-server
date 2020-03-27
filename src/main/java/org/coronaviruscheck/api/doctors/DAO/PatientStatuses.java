@@ -4,6 +4,7 @@ import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.POJO.PatientStatus;
 
 import java.sql.*;
@@ -19,7 +20,7 @@ public class PatientStatuses {
     public PatientStatuses() {
     }
 
-    public static PatientStatus getActualStatus( Integer patientId ) throws SQLException {
+    public static PatientStatus getActualStatus( Integer patientId ) throws SQLException, NotFoundException {
 
         String myQuery = "SELECT p1.* " +
                 "FROM patient_statuses p1 " +
@@ -50,7 +51,7 @@ public class PatientStatuses {
             if ( !patients.isEmpty() ) {
                 return patients.get( 0 );
             } else {
-                throw new EmptyStackException();
+                throw new NotFoundException();
             }
 
         } finally {

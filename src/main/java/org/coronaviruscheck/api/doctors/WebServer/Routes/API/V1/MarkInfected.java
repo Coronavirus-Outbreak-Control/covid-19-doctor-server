@@ -7,10 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
 import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
+import org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Patient;
 import org.coronaviruscheck.api.doctors.DAO.POJO.PatientStatus;
 import org.coronaviruscheck.api.doctors.DAO.PatientStatuses;
 import org.coronaviruscheck.api.doctors.DAO.Patients;
+import org.coronaviruscheck.api.doctors.Services.Notifications;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.EmptyAuthorization;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.JwtAuthValidator;
@@ -69,8 +71,17 @@ public class MarkInfected {
 
         Doctor  doc = Doctors.getActiveDoctorById( doctorId );
         Patient pt  = Patients.getPatientById( patientId );
-        PatientStatus actualStatus = PatientStatuses.getActualStatus( patientId );
-        return PatientStatuses.addStatus( actualStatus.getActual_status(), newStatus, patientId, doctorId );
+
+        //TODO Remove
+        Notifications notifications = new Notifications();
+        notifications.callForPushes( pt.getHs_id(), newStatus );
+
+        try {
+            PatientStatus actualPatientStatus = PatientStatuses.getActualStatus( patientId );
+            return PatientStatuses.addStatus( actualPatientStatus.getActual_status(), newStatus, patientId, doctorId );
+        } catch ( NotFoundException e ){
+            return PatientStatuses.addStatus( InfectionStatus.NORMAL.toValue(), newStatus, patientId, doctorId );
+        }
 
     }
 
