@@ -30,7 +30,7 @@ public class Notifications extends HttpClientAbstract {
 
             //GET localhost:9000/push/<device_id>/<status>
 
-            URIBuilder builder = new URIBuilder( "http://localhost:9000/push/" + deviceId + "/" + status );
+            URIBuilder builder = new URIBuilder( "http://localhost:9001/push/" + deviceId + "/" + status );
 
             HttpGet get = new HttpGet( builder.build() );
             httpclient.execute( get, response() );

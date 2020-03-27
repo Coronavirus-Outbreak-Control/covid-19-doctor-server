@@ -2,7 +2,7 @@ package org.coronaviruscheck.api.doctors.CommonLibs.HttpClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -19,7 +19,7 @@ public class JsonObject {
             objectMapper.writeValue( stringWriter, this );
             return stringWriter.toString();
         } catch ( IOException ex ) {
-            Logger.getLogger( getClass() ).error( ex.getMessage(), ex );
+            LogManager.getLogger( getClass() ).error( ex.getMessage(), ex );
             return super.toString();
         }
 

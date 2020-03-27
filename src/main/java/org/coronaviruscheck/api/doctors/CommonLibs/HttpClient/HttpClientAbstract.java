@@ -4,7 +4,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -40,7 +39,6 @@ public abstract class HttpClientAbstract {
         return userAgent;
     }
 
-    @NotNull
     public BufferedInputStream getBufferedInputStream( CloseableHttpClient httpclient, HttpGet httpGet ) throws IOException {
 
         CloseableHttpResponse response = this.getResponse( httpclient, httpGet );
@@ -59,7 +57,6 @@ public abstract class HttpClientAbstract {
 
     }
 
-    @NotNull
     public BufferedInputStream getBufferedInputStream( CloseableHttpResponse response ) throws IOException {
 
         InputStream bis = response.getEntity().getContent();
@@ -76,7 +73,6 @@ public abstract class HttpClientAbstract {
 
     }
 
-    @NotNull
     public CloseableHttpResponse getResponse( CloseableHttpClient httpclient, HttpGet httpGet ) throws IOException {
 
         CloseableHttpResponse response = httpclient.execute( httpGet );
