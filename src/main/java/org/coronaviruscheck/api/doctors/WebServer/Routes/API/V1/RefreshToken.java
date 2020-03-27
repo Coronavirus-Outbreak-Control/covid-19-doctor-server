@@ -6,6 +6,7 @@ import io.fusionauth.jwt.hmac.HMACSigner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
+import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
@@ -17,7 +18,6 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.EmptyStackException;
 import java.util.HashMap;
 
 /**
@@ -59,7 +59,7 @@ public class RefreshToken {
 
             return Response.ok( clientResponse ).build();
 
-        } catch ( EmptyStackException e ) {
+        } catch ( NotFoundException e ) {
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.NOT_FOUND.getStatusCode() ).build();
         } catch ( SQLException e ) {

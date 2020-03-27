@@ -1,19 +1,18 @@
 package org.coronaviruscheck.api.doctors.DAO;
 
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
 
-import java.sql.*;
-import java.util.EmptyStackException;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 22/03/2020
  */
-public class Doctors {
+public class Doctors extends AbstractDao {
 
     private Doctors() {
     }
@@ -74,15 +73,37 @@ public class Doctors {
         return setActive( doc.getPhone_number() );
     }
 
-    public static Doctor getActiveDoctorByPhone( String cryptPhoneNumber ) throws SQLException {
-        return getDoctor( cryptPhoneNumber, true );
+    public static Doctor getActiveDoctorByPhone( String cryptPhoneNumber ) throws SQLException, NotFoundException {
+        return getDoctorByPhone( cryptPhoneNumber, true );
     }
 
-    public static Doctor getInactiveDoctorByPhone( String cryptPhoneNumber ) throws SQLException {
-        return getDoctor( cryptPhoneNumber, false );
+    public static Doctor getInactiveDoctorByPhone( String cryptPhoneNumber ) throws SQLException, NotFoundException {
+        return getDoctorByPhone( cryptPhoneNumber, false );
     }
 
-    protected static Doctor getDoctor( String cryptPhoneNumber, boolean active ) throws SQLException, EmptyStackException {
+    public static Doctor getActiveDoctorById( Integer doctorId ) throws SQLException, NotFoundException {
+        return getDoctorById( doctorId, true );
+    }
+
+    public static Doctor getInactiveDoctorById( Integer doctorId ) throws SQLException, NotFoundException {
+        return getDoctorById( doctorId, false );
+    }
+
+    protected static Doctor getDoctorById( Integer doctorId, boolean active ) throws SQLException, NotFoundException {
+
+        String myQuery = "SELECT * FROM doctors WHERE id = ?";
+
+        if ( active ) {
+            myQuery += " AND active = 1";
+        } else {
+            myQuery += " AND active = 0";
+        }
+
+        return get( Doctor.class, myQuery, doctorId );
+
+    }
+
+    protected static Doctor getDoctorByPhone( String cryptPhoneNumber, boolean active ) throws SQLException, NotFoundException {
 
         String myQuery = "SELECT * FROM doctors WHERE phone_number = ?";
 
@@ -92,25 +113,7 @@ public class Doctors {
             myQuery += " AND active = 0";
         }
 
-        QueryRunner  run        = new QueryRunner();
-        Connection   connection = null;
-        List<Doctor> doctors;
-
-        try {
-            connection = DatabasePool.getDataSource().getConnection();
-            ResultSetHandler<List<Doctor>> h = new BeanListHandler<>( Doctor.class );
-
-            doctors = run.query( connection, myQuery, h, cryptPhoneNumber );
-
-            if ( !doctors.isEmpty() ) {
-                return doctors.get( 0 );
-            } else {
-                throw new EmptyStackException();
-            }
-
-        } finally {
-            DbUtils.closeQuietly( connection );
-        }
+        return get( Doctor.class, myQuery, cryptPhoneNumber );
 
     }
 
