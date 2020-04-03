@@ -1,0 +1,50 @@
+version: '3.3'
+
+networks:
+  covid-19-network:
+    driver: bridge
+
+# docker push registry.gitlab.com/coronavirus-outbreak-control/covid-19-consumer-server
+services:
+
+  doctor-app-server-base:
+    image: doctor-app-server-base
+    build:
+      context: .
+      dockerfile: docker/doctor-app-server-base/Dockerfile
+
+  doctor-app-server:
+    image: registry.gitlab.com/coronavirus-outbreak-control/covid-19-doctor-server
+    build:
+      context: .
+      dockerfile: docker/covid19-doctor-server/Dockerfile
+      args:
+        _env: ${_env}
+    container_name: covid-19-doctor1
+    ports:
+      - 9000:9000
+    networks:
+      - covid-19-network
+    links:
+      - mysql
+      - redis
+
+  mysql:
+    image: covid_mysql
+    build:
+      context: .
+      dockerfile: docker/MySql/Dockerfile
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    networks:
+      - covid-19-network
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - covid-19-network
