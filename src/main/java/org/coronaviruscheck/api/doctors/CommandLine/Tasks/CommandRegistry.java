@@ -31,7 +31,7 @@ public class CommandRegistry {
      */
     public Command build( String[] args ) throws CommandNotFoundException {
 
-        String _cmd = args[ 0 ].toLowerCase();
+        String _cmd = args[ 0 ];
         if( availableTasks.get( _cmd ) == null ){
             throw new CommandNotFoundException( "Undefined command: " + args[ 0 ] + "\n Available commands: " + availableTasks.keySet() );
         }

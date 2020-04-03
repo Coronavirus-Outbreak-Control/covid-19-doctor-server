@@ -5,13 +5,15 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.BootstrapLogger;
-import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
+import org.coronaviruscheck.api.doctors.Services.AMQ.AMQPooledConnectionSingleton;
+import org.coronaviruscheck.api.doctors.Services.Redis.RedisHandler;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.ResourceConfig;
 import org.glassfish.jersey.netty.httpserver.NettyHttpContainerProvider;
 
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -69,10 +71,15 @@ public class Main {
     public static final Logger logger   = LogManager.getLogger( Main.class );
     public static final String hostName = getHostName();
 
-    private Main( ResourceConfig serviceConfig, String[] args ) {
+    private Main( ResourceConfig serviceConfig, String[] args ) throws URISyntaxException {
         this.commandLine = this.parseArgs( args );
         this.registerShutdownHook();
-        RedisHandler.init();
+        RedisHandler.init( ApplicationRegistry.RedisDSN );
+//        AMQPooledConnectionSingleton.init(
+//                new URI( ApplicationRegistry.BrokerUrl ),
+//                ApplicationRegistry.BrokerUser,
+//                ApplicationRegistry.BrokerPass
+//        );
         this.setServiceConfig( serviceConfig );
         this.setMemoryCheck();
     }

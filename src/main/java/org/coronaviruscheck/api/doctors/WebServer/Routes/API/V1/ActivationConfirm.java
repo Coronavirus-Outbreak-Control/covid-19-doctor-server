@@ -2,7 +2,7 @@ package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
+import org.coronaviruscheck.api.doctors.Services.Redis.RedisHandler;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
 import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;

@@ -72,9 +72,8 @@ public class MarkInfected {
         Doctor  doc = Doctors.getActiveDoctorById( doctorId );
         Patient pt  = Patients.getPatientById( patientId );
 
-        //TODO Remove
         Notifications notifications = new Notifications();
-        notifications.callForPushes( pt.getHs_id(), newStatus );
+        notifications.pushOnQueue( pt.getHs_id(), newStatus );
 
         try {
             PatientStatus actualPatientStatus = PatientStatuses.getActualStatus( patientId );

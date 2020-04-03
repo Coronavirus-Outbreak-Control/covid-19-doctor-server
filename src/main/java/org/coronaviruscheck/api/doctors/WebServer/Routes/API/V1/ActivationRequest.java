@@ -3,7 +3,7 @@ package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.Crypt.Crypto;
-import org.coronaviruscheck.api.doctors.CommonLibs.RedisHandler;
+import org.coronaviruscheck.api.doctors.Services.Redis.RedisHandler;
 import org.coronaviruscheck.api.doctors.CommonLibs.Twilio.SMS;
 import org.coronaviruscheck.api.doctors.CommonLibs.Twilio.TwilioException;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
