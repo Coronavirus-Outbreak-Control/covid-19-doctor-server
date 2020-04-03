@@ -7,3 +7,4 @@ logs/*
 /.env.prod
 settings.xml
 /.env
+server-configuration
