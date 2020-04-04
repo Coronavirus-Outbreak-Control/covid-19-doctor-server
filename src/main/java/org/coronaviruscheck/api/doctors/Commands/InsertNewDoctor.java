@@ -6,6 +6,8 @@ import org.apache.commons.cli.Options;
 import org.coronaviruscheck.api.doctors.CommandLine.Exceptions.CommandLineException;
 import org.coronaviruscheck.api.doctors.CommandLine.Tasks.Command;
 import org.coronaviruscheck.api.doctors.CommandLine.Tasks.CommandClassFactory;
+import org.coronaviruscheck.api.doctors.Services.Redis.RedisHandler;
+import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.InviteNewDoctor;
 
 /**
@@ -43,6 +45,7 @@ public class InsertNewDoctor extends Command implements CommandClassFactory {
 
     @Override
     protected void _execute() throws Exception {
+        RedisHandler.init( ApplicationRegistry.RedisDSN );
         InviteNewDoctor ind = new InviteNewDoctor();
         ind.execute( this.phone_number, Integer.parseInt( this.user_id ) );
     }
