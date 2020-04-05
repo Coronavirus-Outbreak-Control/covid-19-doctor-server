@@ -5,6 +5,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
+import org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus;
 import org.coronaviruscheck.api.doctors.DAO.POJO.PatientStatus;
 
 import java.sql.*;
@@ -60,7 +61,7 @@ public class PatientStatuses {
 
     }
 
-    public static PatientStatus addStatus( Integer actualStatus, Integer newStatus, Integer patientId, Integer doctorId ) throws SQLException {
+    public static PatientStatus addStatus( InfectionStatus actualStatus, InfectionStatus newStatus, Integer patientId, Integer doctorId ) throws SQLException {
 
         Connection        connection   = null;
         PreparedStatement preparedStmt = null;
@@ -77,8 +78,8 @@ public class PatientStatuses {
 
             // create the mysql insert preparedstatement
             preparedStmt.setInt( 1, patientId );
-            preparedStmt.setInt( 2, actualStatus );
-            preparedStmt.setInt( 3, newStatus );
+            preparedStmt.setInt( 2, actualStatus.toValue() );
+            preparedStmt.setInt( 3, newStatus.toValue() );
             preparedStmt.setInt( 4, doctorId );
 
             Timestamp now = new Timestamp( Instant.now().getEpochSecond() * 1000 );
@@ -96,8 +97,8 @@ public class PatientStatuses {
             PatientStatus newPStatus = new PatientStatus();
             newPStatus.setId( id );
             newPStatus.setPatient_id( patientId );
-            newPStatus.setOld_status( actualStatus );
-            newPStatus.setActual_status( newStatus );
+            newPStatus.setOld_status( actualStatus.toValue() );
+            newPStatus.setActual_status( newStatus.toValue() );
             newPStatus.setUpdated_by( doctorId );
             newPStatus.setUpdated_at( now );
 

@@ -2,6 +2,7 @@ package org.coronaviruscheck.api.doctors;
 
 import org.coronaviruscheck.api.doctors.CommandLine.Tasks.CommandRegistry;
 import org.coronaviruscheck.api.doctors.Commands.InsertNewDoctor;
+import org.coronaviruscheck.api.doctors.Commands.MarkInfected;
 import org.coronaviruscheck.api.doctors.Commands.PushInfected;
 
 /**
@@ -23,6 +24,9 @@ public class Console extends org.coronaviruscheck.api.doctors.CommandLine.Consol
 
         //java -cp target/Covid19-DoctorAppServer-1.0.jar org.coronaviruscheck.api.doctors.Console pushInfected -d 0 -s 0
         CommandRegistry.getInstance().addCommand( "pushInfected", PushInfected::new );
+
+        //java -cp target/Covid19-DoctorAppServer-1.0.jar org.coronaviruscheck.api.doctors.Console markInfected -p 0 -d 0 -s 0
+        CommandRegistry.getInstance().addCommand( "markInfected", MarkInfected::new );
 
     }
 

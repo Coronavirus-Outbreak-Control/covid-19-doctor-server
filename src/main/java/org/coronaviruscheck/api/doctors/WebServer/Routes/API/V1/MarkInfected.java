@@ -5,6 +5,7 @@ import io.fusionauth.jwt.domain.JWT;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
+import org.coronaviruscheck.api.doctors.DAO.Exceptions.InvalidInfectionStatus;
 import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
 import org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus;
@@ -22,6 +23,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.HashMap;
+
+import static org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus.*;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 24/03/2020
@@ -61,26 +64,45 @@ public class MarkInfected {
         } catch ( SQLException e ) { //SQLException
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.SERVICE_UNAVAILABLE.getStatusCode() ).build();
+        } catch ( InvalidInfectionStatus invExSt ) {
+            logger.error( invExSt.getMessage(), invExSt );
+            return Response.status( Response.Status.BAD_REQUEST.getStatusCode() ).build();
         }
 
         return Response.ok().entity( updatedStatus ).build();
 
     }
 
-    private PatientStatus execute( Integer newStatus, Integer patientId, Integer doctorId ) throws SQLException, NotFoundException {
+    public PatientStatus execute( Integer newStatus, Integer patientId, Integer doctorId ) throws SQLException, NotFoundException, InvalidInfectionStatus {
 
         Doctor  doc = Doctors.getActiveDoctorById( doctorId );
         Patient pt  = Patients.getPatientById( patientId );
 
-        Notifications notifications = new Notifications();
-        notifications.pushOnQueue( pt.getHs_id(), newStatus );
+        InfectionStatus newInfectionStatus = InfectionStatus.forValue( newStatus );
 
+        PatientStatus freshNewStatus;
         try {
+
+            //Not found exception if there are no records for the patient
             PatientStatus actualPatientStatus = PatientStatuses.getActualStatus( patientId );
-            return PatientStatuses.addStatus( actualPatientStatus.getActual_status(), newStatus, patientId, doctorId );
-        } catch ( NotFoundException e ){
-            return PatientStatuses.addStatus( InfectionStatus.NORMAL.toValue(), newStatus, patientId, doctorId );
+
+            InfectionStatus actualInfectionStatus = InfectionStatus.forValue( actualPatientStatus.getActual_status() );
+            if ( newInfectionStatus == INFECTED && actualInfectionStatus != SUSPECT ) {
+                //actual status must be suspect before to mark as infected
+                throw new InvalidInfectionStatus( "Previous SUSPECT status not found." );
+            }
+
+            freshNewStatus = PatientStatuses.addStatus( actualInfectionStatus, newInfectionStatus, patientId, doctorId );
+        } catch ( NotFoundException e ) {
+            freshNewStatus = PatientStatuses.addStatus( InfectionStatus.NORMAL, newInfectionStatus, patientId, doctorId );
         }
+
+        if ( newInfectionStatus != InfectionStatus.SUSPECT ) {
+            Notifications notifications = new Notifications();
+            notifications.pushOnQueue( pt.getHs_id(), newStatus );
+        }
+
+        return freshNewStatus;
 
     }
 
