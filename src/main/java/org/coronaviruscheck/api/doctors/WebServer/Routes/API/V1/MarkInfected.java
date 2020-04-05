@@ -80,22 +80,21 @@ public class MarkInfected {
 
         InfectionStatus newInfectionStatus = InfectionStatus.forValue( newStatus );
 
-        PatientStatus freshNewStatus;
+        PatientStatus actualPatientStatus;
         try {
-
             //Not found exception if there are no records for the patient
-            PatientStatus actualPatientStatus = PatientStatuses.getActualStatus( patientId );
-
-            InfectionStatus actualInfectionStatus = InfectionStatus.forValue( actualPatientStatus.getActual_status() );
-            if ( newInfectionStatus == INFECTED && actualInfectionStatus != SUSPECT ) {
-                //actual status must be suspect before to mark as infected
-                throw new InvalidInfectionStatus( "Previous SUSPECT status not found." );
-            }
-
-            freshNewStatus = PatientStatuses.addStatus( actualInfectionStatus, newInfectionStatus, patientId, doctorId );
+            actualPatientStatus = PatientStatuses.getActualStatus( patientId );
         } catch ( NotFoundException e ) {
-            freshNewStatus = PatientStatuses.addStatus( InfectionStatus.NORMAL, newInfectionStatus, patientId, doctorId );
+            actualPatientStatus = PatientStatuses.addStatus( InfectionStatus.NORMAL, newInfectionStatus, patientId, doctorId );
         }
+
+        InfectionStatus actualInfectionStatus = InfectionStatus.forValue( actualPatientStatus.getActual_status() );
+        if ( newInfectionStatus == INFECTED && actualInfectionStatus != SUSPECT ) {
+            //actual status must be suspect before to mark as infected
+            throw new InvalidInfectionStatus( "Previous SUSPECT status not found." );
+        }
+
+        PatientStatus freshNewStatus = PatientStatuses.addStatus( actualInfectionStatus, newInfectionStatus, patientId, doctorId );
 
         if ( newInfectionStatus != InfectionStatus.SUSPECT ) {
             Notifications notifications = new Notifications();
