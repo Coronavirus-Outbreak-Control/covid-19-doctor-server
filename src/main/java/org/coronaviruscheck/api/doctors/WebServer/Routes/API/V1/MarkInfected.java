@@ -24,7 +24,8 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import static org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus.*;
+import static org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus.INFECTED;
+import static org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus.SUSPECT;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 24/03/2020

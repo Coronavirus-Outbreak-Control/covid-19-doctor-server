@@ -5,7 +5,6 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.CommonLibs.BootstrapLogger;
-import org.coronaviruscheck.api.doctors.Services.AMQ.AMQPooledConnectionSingleton;
 import org.coronaviruscheck.api.doctors.Services.Redis.RedisHandler;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.ResourceConfig;

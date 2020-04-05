@@ -6,7 +6,6 @@ import org.apache.commons.cli.Options;
 import org.coronaviruscheck.api.doctors.CommandLine.Exceptions.CommandLineException;
 import org.coronaviruscheck.api.doctors.CommandLine.Tasks.Command;
 import org.coronaviruscheck.api.doctors.CommandLine.Tasks.CommandClassFactory;
-import org.coronaviruscheck.api.doctors.Services.Notifications;
 
 /**
  * @author Domenico Lupinetti <ostico@gmail.com> - 03/04/2020

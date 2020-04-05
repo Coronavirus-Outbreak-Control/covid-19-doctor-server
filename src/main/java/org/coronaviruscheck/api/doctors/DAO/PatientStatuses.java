@@ -10,7 +10,6 @@ import org.coronaviruscheck.api.doctors.DAO.POJO.PatientStatus;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.EmptyStackException;
 import java.util.List;
 
 /**
@@ -33,31 +32,7 @@ public class PatientStatuses {
                 ") p2 ON " +
                 "    p1.id = p2.id " +
                 "    AND patient_id = ?";
-
-        QueryRunner         run        = new QueryRunner();
-        Connection          connection = null;
-        List<PatientStatus> patients;
-
-        try {
-
-            connection = DatabasePool.getDataSource().getConnection();
-            ResultSetHandler<List<PatientStatus>> h = new BeanListHandler<>( PatientStatus.class );
-
-            Integer[] params = new Integer[]{
-                    patientId, patientId
-            };
-
-            patients = run.query( connection, myQuery, h, (Object[])params );
-
-            if ( !patients.isEmpty() ) {
-                return patients.get( 0 );
-            } else {
-                throw new NotFoundException();
-            }
-
-        } finally {
-            DbUtils.closeQuietly( connection );
-        }
+        return getPatientStatus( myQuery, patientId, patientId ).get( 0 );
 
     }
 
@@ -111,12 +86,29 @@ public class PatientStatuses {
 
     }
 
-    public static PatientStatus getById( int rowId ) throws SQLException {
-        String myQuery = "SELECT * FROM patient_statuses where id = ?";
-        return getPatientStatus( rowId, myQuery );
+    public static List<PatientStatus> getSuspectStatusesByDoctorId( int doctorId ) throws SQLException, NotFoundException {
+        String myQuery = "SELECT p1.* " +
+                "FROM patient_statuses p1 " +
+                "INNER JOIN ( " +
+                "    SELECT MAX(id) as id " +
+                "    FROM patient_statuses " +
+                "    WHERE updated_by = ? " +
+                "    GROUP BY patient_id " +
+                ") p2 ON " +
+                "    p1.id = p2.id " +
+                "    AND updated_by = ?" +
+                "    AND actual_status = ?;";
+
+        return getPatientStatus( myQuery, doctorId, doctorId, InfectionStatus.SUSPECT.toValue() );
     }
 
-    private static PatientStatus getPatientStatus( int id, String myQuery ) throws SQLException {
+    public static PatientStatus getById( int rowId ) throws SQLException, NotFoundException {
+        String myQuery = "SELECT * FROM patient_statuses where id = ?";
+        return getPatientStatus( myQuery, rowId ).get( 0 );
+    }
+
+    private static List<PatientStatus> getPatientStatus( String myQuery, Object... params ) throws SQLException, NotFoundException {
+
         QueryRunner         run        = new QueryRunner();
         Connection          connection = null;
         List<PatientStatus> patients;
@@ -126,12 +118,12 @@ public class PatientStatuses {
             connection = DatabasePool.getDataSource().getConnection();
             ResultSetHandler<List<PatientStatus>> h = new BeanListHandler<>( PatientStatus.class );
 
-            patients = run.query( connection, myQuery, h, id );
+            patients = run.query( connection, myQuery, h, params );
 
             if ( !patients.isEmpty() ) {
-                return patients.get( 0 );
+                return patients;
             } else {
-                throw new EmptyStackException();
+                throw new NotFoundException();
             }
 
         } finally {
