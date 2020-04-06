@@ -7,7 +7,7 @@ import java.sql.Timestamp;
  */
 public class Patient {
 
-    private Long      id;
+    private Integer   id;
     private String    hs_id;
     private String    os_name;
     private String    device_manufacturer;
@@ -15,11 +15,11 @@ public class Patient {
     private Timestamp created_at;
     private String    notification_id;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId( Long id ) {
+    public void setId( Integer id ) {
         this.id = id;
     }
 

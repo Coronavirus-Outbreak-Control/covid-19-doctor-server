@@ -99,7 +99,7 @@ public class MarkInfected {
 
         if ( newInfectionStatus != InfectionStatus.SUSPECT ) {
             Notifications notifications = new Notifications();
-            notifications.pushOnQueue( pt.getHs_id(), newStatus );
+            notifications.pushOnQueue( pt.getId(), newStatus );
         }
 
         return freshNewStatus;

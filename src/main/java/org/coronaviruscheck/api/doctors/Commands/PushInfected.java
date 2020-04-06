@@ -13,7 +13,7 @@ import org.coronaviruscheck.api.doctors.Services.Notifications;
  */
 public class PushInfected extends Command implements CommandClassFactory {
 
-    private String device_id;
+    private int device_id;
     private int status;
 
     public PushInfected( String[] args ) {
@@ -52,7 +52,7 @@ public class PushInfected extends Command implements CommandClassFactory {
 
         if ( line.hasOption( "device_id" ) ) {
             // initialise the member variable
-            device_id = line.getOptionValue( "device_id" );
+            device_id = Integer.parseInt( line.getOptionValue( "device_id" ) );
         }
 
         if ( line.hasOption( "status" ) ) {

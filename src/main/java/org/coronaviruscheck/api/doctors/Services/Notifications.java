@@ -52,7 +52,7 @@ public class Notifications extends HttpClientAbstract {
 
     }
 
-    public void pushOnQueue( String deviceId, Integer status ) throws AmazonSQSException {
+    public void pushOnQueue( Integer deviceId, Integer status ) throws AmazonSQSException {
 
         final BasicAWSCredentials credentialsProvider = new BasicAWSCredentials(
                 ApplicationRegistry.AWS_ACCESS_KEY_ID,
