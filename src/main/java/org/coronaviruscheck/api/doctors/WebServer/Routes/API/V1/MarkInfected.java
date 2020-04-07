@@ -50,8 +50,9 @@ public class MarkInfected {
         try {
             jwt = JwtAuthValidator.validate( authString );
         } catch ( JWTExpiredException | EmptyAuthorization je ) {
+            logger.error( je.getMessage(), je );
             GenericResponse genericResponse = new GenericResponse();
-            genericResponse.message = "Token expired.";
+            genericResponse.message = "Invalid token.";
             genericResponse.status = Response.Status.FORBIDDEN.getStatusCode();
             return Response.status( Response.Status.FORBIDDEN.getStatusCode() ).entity( genericResponse ).build();
         }
