@@ -43,7 +43,8 @@ public class MarkInfected {
             HashMap<String, String> payload,
             @PathParam("patientId") Integer patientId,
             @PathParam("newStatus") Integer newStatus,
-            @HeaderParam("authorization") String authString
+            @HeaderParam("authorization") String authString,
+            @DefaultValue("false") @QueryParam("ignore_status_check") Boolean ignore_status_check
     ) {
 
         JWT jwt;
@@ -59,7 +60,7 @@ public class MarkInfected {
 
         PatientStatus updatedStatus;
         try {
-            updatedStatus = this.execute( newStatus, patientId, jwt.getInteger( "id" ) );
+            updatedStatus = this.execute( newStatus, patientId, jwt.getInteger( "id" ), ignore_status_check );
         } catch ( NotFoundException e ) {
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.NOT_FOUND.getStatusCode() ).build();
@@ -75,33 +76,37 @@ public class MarkInfected {
 
     }
 
-    public PatientStatus execute( Integer newStatus, Integer patientId, Integer doctorId ) throws SQLException, NotFoundException, InvalidInfectionStatus {
+    public PatientStatus execute(
+            Integer newStatus,
+            Integer patientId,
+            Integer doctorId,
+            Boolean ignore_status_check
+    ) throws SQLException, NotFoundException, InvalidInfectionStatus {
 
         Doctor  doc = Doctors.getActiveDoctorById( doctorId );
         Patient pt  = Patients.getPatientById( patientId );
 
         InfectionStatus newInfectionStatus = InfectionStatus.forValue( newStatus );
 
-        PatientStatus actualPatientStatus;
+        InfectionStatus actualInfectionStatus;
         try {
             //Not found exception if there are no records for the patient
-            actualPatientStatus = PatientStatuses.getActualStatus( patientId );
+            PatientStatus actualPatientStatus = PatientStatuses.getActualStatus( patientId );
+            actualInfectionStatus = InfectionStatus.forValue( actualPatientStatus.getActual_status() );
         } catch ( NotFoundException e ) {
-            actualPatientStatus = PatientStatuses.addStatus( InfectionStatus.NORMAL, newInfectionStatus, patientId, doctorId );
+            actualInfectionStatus = InfectionStatus.NORMAL;
         }
 
-        InfectionStatus actualInfectionStatus = InfectionStatus.forValue( actualPatientStatus.getActual_status() );
-        if ( newInfectionStatus == INFECTED && actualInfectionStatus != SUSPECT ) {
+        if ( newInfectionStatus == INFECTED && actualInfectionStatus != SUSPECT && !ignore_status_check ) {
             //actual status must be suspect before to mark as infected
             throw new InvalidInfectionStatus( "Previous SUSPECT status not found." );
         }
 
         PatientStatus freshNewStatus = PatientStatuses.addStatus( actualInfectionStatus, newInfectionStatus, patientId, doctorId );
 
-        if ( newInfectionStatus != InfectionStatus.SUSPECT ) {
-            Notifications notifications = new Notifications();
-            notifications.pushOnQueue( pt.getId(), newStatus );
-        }
+        // send status to the queue
+        Notifications notifications = new Notifications();
+        notifications.pushOnQueue( pt.getId(), newStatus );
 
         return freshNewStatus;
 

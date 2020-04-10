@@ -53,7 +53,7 @@ public class MarkInfected extends Command implements CommandClassFactory {
     protected void _execute() throws Exception {
         org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.MarkInfected not
                 = new org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.MarkInfected();
-        not.execute( this.status, this.patient_id, this.doctor_id );
+        not.execute( this.status, this.patient_id, this.doctor_id, true );
     }
 
     @Override
