@@ -1,5 +1,6 @@
 .idea/*
 target/*
+out/*
 logs/*
 .DS_Store
 /docker/ansible_deploy/venv/
