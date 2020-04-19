@@ -24,9 +24,7 @@ public class SimpleRateLimiterForInfectionsMarks {
         long        tries             = triesInThisMinute.incrementAndGet();
 
         Calendar c = Calendar.getInstance();
-        c.add( Calendar.DAY_OF_MONTH, 0 );
-        c.set( Calendar.HOUR_OF_DAY, 0 );
-        c.set( Calendar.MINUTE, 1 );
+        c.add( Calendar.MINUTE, 1 );
         c.set( Calendar.SECOND, 0 );
         c.set( Calendar.MILLISECOND, 0 );
         long howMany = ( (int) ( c.getTimeInMillis() / 1000 ) - (int) ( System.currentTimeMillis() / 1000 ) );

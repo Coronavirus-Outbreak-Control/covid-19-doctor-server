@@ -1,12 +1,12 @@
 package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 
-import io.fusionauth.jwt.JWTExpiredException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.PatientStatuses;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.EmptyAuthorization;
+import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.JWTExpiredException;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.JwtAuthValidator;
 
 import javax.ws.rs.*;
