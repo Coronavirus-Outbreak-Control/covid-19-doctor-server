@@ -39,10 +39,6 @@ public class ApplicationRegistry {
     public final static String ACCOUNT_SID = properties.getProperty( "Twilio.ACCOUNT_SID" );
     public final static String AUTH_TOKEN  = properties.getProperty( "Twilio.AUTH_TOKEN" );
 
-//    public final static String BrokerUrl  = properties.getProperty( "Amq.brokerUrl" );
-//    public final static String BrokerUser  = properties.getProperty( "Amq.brokerUser" );
-//    public final static String BrokerPass  = properties.getProperty( "Amq.brokerPass" );
-
     public final static String AWS_ACCESS_KEY_ID = properties.getProperty( "AWS_ACCESS_KEY_ID" );
     public final static String AWS_SECRET_ACCESS_KEY = properties.getProperty( "AWS_SECRET_ACCESS_KEY" );
 

@@ -1,12 +1,9 @@
 package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 
-import io.fusionauth.jwt.JWTExpiredException;
 import io.fusionauth.jwt.domain.JWT;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.coronaviruscheck.api.doctors.DAO.Doctors;
-import org.coronaviruscheck.api.doctors.DAO.Exceptions.InvalidInfectionStatus;
-import org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Doctor;
 import org.coronaviruscheck.api.doctors.DAO.POJO.InfectionStatus;
 import org.coronaviruscheck.api.doctors.DAO.POJO.Patient;
@@ -14,9 +11,10 @@ import org.coronaviruscheck.api.doctors.DAO.POJO.PatientStatus;
 import org.coronaviruscheck.api.doctors.DAO.PatientStatuses;
 import org.coronaviruscheck.api.doctors.DAO.Patients;
 import org.coronaviruscheck.api.doctors.Services.Notifications;
-import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
-import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.EmptyAuthorization;
+import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.NotFoundException;
+import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.*;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.JwtAuthValidator;
+import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.SimpleRateLimiterForInfectionsMarks;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -47,29 +45,23 @@ public class MarkInfected {
             @DefaultValue("false") @QueryParam("ignore_status_check") Boolean ignore_status_check
     ) {
 
-        JWT jwt;
-        try {
-            jwt = JwtAuthValidator.validate( authString );
-        } catch ( JWTExpiredException | EmptyAuthorization je ) {
-            logger.error( je.getMessage(), je );
-            GenericResponse genericResponse = new GenericResponse();
-            genericResponse.message = "Invalid token.";
-            genericResponse.status = Response.Status.FORBIDDEN.getStatusCode();
-            return Response.status( Response.Status.FORBIDDEN.getStatusCode() ).entity( genericResponse ).build();
-        }
-
+        JWT           jwt;
         PatientStatus updatedStatus;
         try {
+            jwt = JwtAuthValidator.validate( authString );
+            SimpleRateLimiterForInfectionsMarks.validate( jwt.getInteger( "id" ) );
             updatedStatus = this.execute( newStatus, patientId, jwt.getInteger( "id" ), ignore_status_check );
-        } catch ( NotFoundException e ) {
-            logger.error( e.getMessage(), e );
-            return Response.status( Response.Status.NOT_FOUND.getStatusCode() ).build();
         } catch ( SQLException e ) { //SQLException
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.SERVICE_UNAVAILABLE.getStatusCode() ).build();
-        } catch ( InvalidInfectionStatus invExSt ) {
-            logger.error( invExSt.getMessage(), invExSt );
-            return Response.status( Response.Status.BAD_REQUEST.getStatusCode() ).build();
+        } catch ( NotFoundException |
+                InvalidInfectionStatus |
+                TooManyRequestsException |
+                JWTExpiredException |
+                EmptyAuthorization customEx
+        ) {
+            logger.error( customEx.getMessage(), customEx );
+            return customEx.toResponse();
         }
 
         return Response.ok().entity( updatedStatus ).build();
@@ -81,10 +73,16 @@ public class MarkInfected {
             Integer patientId,
             Integer doctorId,
             Boolean ignore_status_check
-    ) throws SQLException, NotFoundException, InvalidInfectionStatus {
+    ) throws SQLException, InvalidInfectionStatus, NotFoundException {
 
-        Doctor  doc = Doctors.getActiveDoctorById( doctorId );
-        Patient pt  = Patients.getPatientById( patientId );
+        Doctor  doc;
+        Patient pt;
+        try {
+            doc = Doctors.getActiveDoctorById( doctorId );
+            pt = Patients.getPatientById( patientId );
+        } catch ( org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException nfEx ) {
+            throw new NotFoundException( "Not Found." );
+        }
 
         InfectionStatus newInfectionStatus = InfectionStatus.forValue( newStatus );
 
@@ -93,7 +91,7 @@ public class MarkInfected {
             //Not found exception if there are no records for the patient
             PatientStatus actualPatientStatus = PatientStatuses.getActualStatus( patientId );
             actualInfectionStatus = InfectionStatus.forValue( actualPatientStatus.getActual_status() );
-        } catch ( NotFoundException e ) {
+        } catch ( org.coronaviruscheck.api.doctors.DAO.Exceptions.NotFoundException e ) {
             actualInfectionStatus = InfectionStatus.NORMAL;
         }
 

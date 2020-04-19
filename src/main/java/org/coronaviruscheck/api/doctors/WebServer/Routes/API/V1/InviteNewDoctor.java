@@ -1,6 +1,5 @@
 package org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1;
 
-import io.fusionauth.jwt.JWTExpiredException;
 import io.fusionauth.jwt.domain.JWT;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +13,7 @@ import org.coronaviruscheck.api.doctors.Services.Redis.RedisHandler;
 import org.coronaviruscheck.api.doctors.WebServer.ApplicationRegistry;
 import org.coronaviruscheck.api.doctors.WebServer.Responses.GenericResponse;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.EmptyAuthorization;
+import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.Exceptions.JWTExpiredException;
 import org.coronaviruscheck.api.doctors.WebServer.Routes.API.V1.Validators.JwtAuthValidator;
 import org.redisson.api.RBucket;
 import org.redisson.api.RSet;
@@ -61,12 +61,8 @@ public class InviteNewDoctor {
             ).entity( genericResponse ).build();
 
         } catch ( JWTExpiredException | EmptyAuthorization je ) {
-
-            GenericResponse genericResponse = new GenericResponse();
-            genericResponse.message = "Token expired.";
-            genericResponse.status = Response.Status.FORBIDDEN.getStatusCode();
-            return Response.status( Response.Status.FORBIDDEN.getStatusCode() ).entity( genericResponse ).build();
-
+            logger.error( je.getMessage(), je );
+            return je.toResponse();
         } catch ( NullPointerException e ) {
             logger.error( e.getMessage(), e );
             return Response.status( Response.Status.BAD_REQUEST.getStatusCode() ).build();
@@ -147,7 +143,7 @@ public class InviteNewDoctor {
             cntLoop++;
             if ( cntLoop == MaxNum ) {
                 //too much cycles try next time
-                throw new Exception( "Too much loops" );
+                throw new Exception( "Too many loops" );
             }
 
         }
