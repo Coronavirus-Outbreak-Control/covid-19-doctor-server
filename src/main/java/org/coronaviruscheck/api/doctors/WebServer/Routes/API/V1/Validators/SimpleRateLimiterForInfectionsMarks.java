@@ -33,7 +33,7 @@ public class SimpleRateLimiterForInfectionsMarks {
         triesInThisMinute.expire( howMany, TimeUnit.SECONDS );
 
         if( tries > 3 ){
-            throw new TooManyRequestsException( "Too much tries in this minute." );
+            throw new TooManyRequestsException( "Too many tries in this minute." );
         }
 
     }
