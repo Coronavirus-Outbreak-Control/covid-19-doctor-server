@@ -28,6 +28,9 @@ public class SimpleRateLimiterForInfectionsMarks {
         c.set( Calendar.SECOND, 0 );
         c.set( Calendar.MILLISECOND, 0 );
         long howMany = ( (int) ( c.getTimeInMillis() / 1000 ) - (int) ( System.currentTimeMillis() / 1000 ) );
+        if( howMany <= 0){
+            howMany = 1;
+        }
         triesInThisMinute.expire( howMany, TimeUnit.SECONDS );
 
         if( tries > 3 ){

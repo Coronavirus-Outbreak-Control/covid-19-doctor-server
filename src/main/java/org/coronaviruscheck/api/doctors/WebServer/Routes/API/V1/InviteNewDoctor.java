@@ -136,6 +136,9 @@ public class InviteNewDoctor {
                 c.set( Calendar.SECOND, 0 );
                 c.set( Calendar.MILLISECOND, 0 );
                 long howMany = ( (int) ( c.getTimeInMillis() / 1000 ) - (int) ( System.currentTimeMillis() / 1000 ) );
+                if( howMany <= 0){
+                    howMany = 1;
+                }
                 set.expire( howMany, TimeUnit.SECONDS );
                 return code;
             }
