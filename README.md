@@ -5,7 +5,7 @@ In order to allow java to compile, it need a `settings.xml` file.
 
 This file contains the secrets needed to the application to properly work.
 
-```#xml
+```xml
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
@@ -56,7 +56,7 @@ _env=production
 
 Modify the `docker-compose.yml` file to use your own preferred registry where to push the images:
 Ex:
-```git
+```diff
 -     image: registry.gitlab.com/coronavirus-outbreak-control/covid-19-doctor-server
 +     image: my_registry.io/coronavirus-outbreak-control/covid-19-doctor-server
 ```
@@ -90,7 +90,7 @@ email: my-mail@gmail.com
 password: my-password
 ```
 
-```git
+```diff
   tasks:
 -   - include_vars: gitlab-registry.login.yml
 +   - include_vars: my_just_created_login_file.yml
